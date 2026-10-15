@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shola — Senior Product Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============ TOKENS ============ */
+  :root {
+    --bg: #05070d;
+    --bg-2: #0b1020;
+    --panel: rgba(16, 22, 40, 0.62);
+    --panel-border: rgba(120, 160, 255, 0.16);
+    --text: #e6ecff;
+    --muted: #8b96b8;
+    --cyan: #3ef2e0;
+    --violet: #8b5cff;
+    --magenta: #ff4fd8;
+    --amber: #ffc857;
+    --grid: rgba(62, 242, 224, 0.06);
+    --glow: 0 0 24px rgba(62, 242, 224, 0.35);
+    --radius: 16px;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --sans: "Space Grotesk", system-ui, sans-serif;
+  }
+  :root[data-theme="light"] {
+    --bg: #f3f5fb;
+    --bg-2: #e7ebf7;
+    --panel: rgba(255, 255, 255, 0.78);
+    --panel-border: rgba(80, 90, 160, 0.18);
+    --text: #10152b;
+    --muted: #55607f;
+    --cyan: #0a9e93;
+    --violet: #5b35e0;
+    --magenta: #c21f9c;
+    --amber: #b7790a;
+    --grid: rgba(10, 158, 147, 0.08);
+    --glow: 0 0 18px rgba(91, 53, 224, 0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background .4s, color .4s;
+  }
+
+  /* ============ BACKGROUND ============ */
+  #field { position: fixed; inset: 0; z-index: -2; }
+  .grid-bg {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 80%);
+  }
+  .orb {
+    position: fixed; border-radius: 50%; filter: blur(90px); opacity: .35; z-index: -1; pointer-events: none;
+  }
+  .orb.a { width: 420px; height: 420px; background: var(--violet); top: -120px; right: -100px; }
+  .orb.b { width: 360px; height: 360px; background: var(--cyan); bottom: -140px; left: -120px; opacity: .2; }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px clamp(16px, 4vw, 48px);
+    backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .brand { font-family: var(--mono); font-size: 13px; letter-spacing: .12em; color: var(--muted); }
+  .brand b { color: var(--cyan); font-weight: 500; }
+  .nav { display: flex; gap: 22px; }
+  .nav a {
+    font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--muted); text-decoration: none; transition: color .2s;
+  }
+  .nav a:hover, .nav a.active { color: var(--cyan); }
+  .actions { display: flex; gap: 8px; }
+  .btn {
+    font-family: var(--mono); font-size: 12px; cursor: pointer;
+    background: transparent; color: var(--text);
+    border: 1px solid var(--panel-border); border-radius: 999px; padding: 7px 14px;
+    transition: border-color .2s, box-shadow .2s, color .2s;
+  }
+  .btn:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: var(--glow); }
+
+  /* ============ LAYOUT ============ */
+  main { max-width: 1100px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 48px) 80px; }
+  section { padding-top: 88px; }
+  .label {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--cyan); display: flex; align-items: center; gap: 12px; margin-bottom: 22px;
+  }
+  .label::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--panel-border), transparent); }
+  .label span { color: var(--muted); }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    position: relative;
+  }
+
+  /* ============ HERO ============ */
+  .hero { padding-top: 72px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: center; }
+  .status {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; color: var(--cyan);
+    border: 1px solid color-mix(in srgb, var(--cyan) 40%, transparent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 22px;
+  }
+  .status i { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); animation: pulse 1.8s infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  h1 {
+    font-size: clamp(48px, 9vw, 96px); line-height: .95; font-weight: 700; letter-spacing: -.03em;
+    background: linear-gradient(110deg, var(--text) 30%, var(--cyan) 60%, var(--violet) 85%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .role { font-size: clamp(18px, 2.4vw, 24px); margin-top: 14px; font-weight: 500; }
+  .typed { font-family: var(--mono); font-size: 15px; color: var(--muted); margin-top: 18px; min-height: 24px; }
+  .typed .caret { display: inline-block; width: 9px; height: 17px; background: var(--cyan); vertical-align: -3px; margin-left: 2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .contact { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+  .contact a, .contact span {
+    font-family: var(--mono); font-size: 12px; color: var(--text); text-decoration: none;
+    padding: 8px 14px; border-radius: 10px; border: 1px solid var(--panel-border); background: var(--panel);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .contact a:hover { border-color: var(--violet); box-shadow: 0 0 18px color-mix(in srgb, var(--violet) 40%, transparent); }
+
+  .hud { padding: 22px; font-family: var(--mono); font-size: 13px; }
+  .hud::before, .hud::after {
+    content: ""; position: absolute; width: 16px; height: 16px; border: 2px solid var(--cyan);
+  }
+  .hud::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; border-top-left-radius: var(--radius); }
+  .hud::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; border-bottom-right-radius: var(--radius); }
+  .hud-title { color: var(--muted); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 14px; }
+  .hud-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed var(--panel-border); }
+  .hud-row:last-child { border-bottom: 0; }
+  .hud-row b { color: var(--cyan); font-weight: 500; text-align: right; }
+  .counter { font-size: 40px; font-family: var(--sans); font-weight: 700; color: var(--text); line-height: 1; }
+  .counter-wrap { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; }
+  .counter-wrap small { color: var(--muted); }
+
+  /* ============ PROFILE ============ */
+  .profile { padding: 28px; font-size: 18px; }
+  .profile strong { color: var(--cyan); font-weight: 600; }
+  .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 18px; }
+  .pillar { padding: 20px; }
+  .pillar .ico { font-family: var(--mono); color: var(--violet); font-size: 13px; margin-bottom: 8px; }
+  .pillar h3 { font-size: 17px; margin-bottom: 6px; }
+  .pillar p { color: var(--muted); font-size: 14px; }
+
+  /* ============ TIMELINE ============ */
+  .timeline { position: relative; padding-left: 34px; }
+  .timeline::before {
+    content: ""; position: absolute; left: 10px; top: 6px; bottom: 6px; width: 2px;
+    background: linear-gradient(var(--cyan), var(--violet), var(--magenta), transparent);
+  }
+  .job { margin-bottom: 20px; padding: 24px; cursor: pointer; transition: border-color .25s, transform .25s; }
+  .job:hover { border-color: color-mix(in srgb, var(--cyan) 50%, transparent); transform: translateX(4px); }
+  .job::before {
+    content: ""; position: absolute; left: -31px; top: 30px; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--cyan); box-shadow: 0 0 12px var(--cyan);
+  }
+  .job-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: baseline; }
+  .job h3 { font-size: 21px; }
+  .job .co { color: var(--cyan); }
+  .job .meta { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .job .sector {
+    display: inline-block; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--violet); margin-top: 4px;
+  }
+  .job-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s ease; }
+  .job.open .job-body { grid-template-rows: 1fr; }
+  .job-body > div { overflow: hidden; }
+  .job ul { margin-top: 14px; padding-left: 18px; color: var(--muted); }
+  .job li { margin-bottom: 6px; }
+  .job li::marker { color: var(--cyan); }
+  .toggle-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 10px; }
+  .job.open .toggle-hint { display: none; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tag {
+    font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 6px;
+    background: color-mix(in srgb, var(--cyan) 10%, transparent); color: var(--cyan);
+    border: 1px solid color-mix(in srgb, var(--cyan) 25%, transparent);
+  }
+
+  /* ============ PROJECTS ============ */
+  .projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .project { padding: 24px; overflow: hidden; transition: transform .3s; }
+  .project:hover { transform: translateY(-4px); }
+  .project::after {
+    content: ""; position: absolute; inset: 0; border-radius: var(--radius); pointer-events: none;
+    background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--violet) 18%, transparent), transparent 40%);
+    opacity: 0; transition: opacity .3s;
+  }
+  .project:hover::after { opacity: 1; }
+  .project .state {
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
+    padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 12px;
+  }
+  .state.shipped { color: var(--cyan); border: 1px solid var(--cyan); }
+  .state.building { color: var(--amber); border: 1px solid var(--amber); }
+  .state.proto { color: var(--magenta); border: 1px solid var(--magenta); }
+  .project h3 { font-size: 19px; margin-bottom: 8px; }
+  .project p { color: var(--muted); font-size: 14.5px; }
+
+  /* ============ SKILLS ============ */
+  .skills { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .skill-group { padding: 22px; }
+  .skill-group h3 { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 13.5px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--panel-border); background: color-mix(in srgb, var(--bg-2) 60%, transparent);
+    transition: border-color .2s, color .2s, box-shadow .2s;
+  }
+  .chip:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: var(--glow); }
+
+  /* ============ EDUCATION ============ */
+  .edu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .edu-card { padding: 22px; }
+  .edu-card .kind { font-family: var(--mono); font-size: 11px; color: var(--cyan); letter-spacing: .14em; text-transform: uppercase; }
+  .edu-card h3 { font-size: 18px; margin: 8px 0 4px; }
+  .edu-card p { color: var(--muted); font-size: 14px; }
+
+  .lang { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+  .lang-item { flex: 1; min-width: 220px; padding: 20px; }
+  .lang-item .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .lang-item .row span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .bar { height: 6px; border-radius: 6px; background: var(--panel-border); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--cyan), var(--violet)); transition: width 1.4s cubic-bezier(.2,.8,.2,1); }
+
+  footer { text-align: center; padding: 40px 16px 60px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+  /* ============ REVEAL ============ */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+    .pillars, .edu { grid-template-columns: 1fr; }
+    .projects, .skills { grid-template-columns: 1fr; }
+    .nav { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+
+  /* ============ PRINT (clean 2-page CV) ============ */
+  @media print {
+    :root {
+      --bg: #fff; --bg-2: #fff; --panel: #fff; --panel-border: #d8dbe6;
+      --text: #111; --muted: #444; --cyan: #0a7d74; --violet: #4a2bc2; --magenta: #a01880; --amber: #8a5a00;
+    }
+    body { background: #fff; font-size: 11pt; }
+    #field, .grid-bg, .orb, .topbar, .toggle-hint, .typed .caret { display: none !important; }
+    main { padding: 0; max-width: none; }
+    section { padding-top: 18px; break-inside: avoid-page; }
+    .hero { padding-top: 0; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+    h1 { font-size: 40pt; color: #111; background: none; -webkit-text-fill-color: #111; }
+    .panel { backdrop-filter: none; box-shadow: none; }
+    .reveal { opacity: 1 !important; transform: none !important; }
+    .job .job-body { grid-template-rows: 1fr !important; }
+    .job, .project, .skill-group, .edu-card { break-inside: avoid; padding: 12px 14px; }
+    .job:hover, .project:hover { transform: none; }
+    .projects, .skills { grid-template-columns: 1fr 1fr; }
+    .pillars, .edu { grid-template-columns: repeat(3, 1fr); }
+    .bar i { width: var(--w) !important; }
+    @page { margin: 14mm; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="grid-bg" aria-hidden="true"></div>
+<div class="orb a" aria-hidden="true"></div>
+<div class="orb b" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">SHOLA<b>.PM</b> // v2026.10</div>
+  <nav class="nav">
+    <a href="#profile">Profile</a>
+    <a href="#experience">Experience</a>
+    <a href="#builds">AI Builds</a>
+    <a href="#skills">Stack</a>
+    <a href="#education">Education</a>
+  </nav>
+  <div class="actions">
+    <button class="btn" id="themeBtn" aria-label="Toggle theme">◐ Theme</button>
+    <button class="btn" id="printBtn">⤓ PDF</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="top">
+    <div class="reveal">
+      <div class="status"><i></i> Open to Senior PM · AI PM · Technical PM roles</div>
+      <h1>Shola</h1>
+      <!-- EDIT: add your surname above if you want it on the CV -->
+      <div class="role">Senior Product Manager / Technical Product Owner</div>
+      <div class="typed"><span id="typed"></span><span class="caret"></span></div>
+      <div class="contact">
+        <!-- EDIT: replace placeholders with your real details -->
+        <span>📍 Berlin, Germany</span>
+        <a href="mailto:you@example.com">✉ you@example.com</a>
+        <a href="https://linkedin.com/in/your-profile" target="_blank" rel="noopener">in/your-profile</a>
+        <a href="https://github.com/your-handle" target="_blank" rel="noopener">gh/your-handle</a>
+      </div>
+    </div>
+
+    <aside class="panel hud reveal">
+      <div class="hud-title">// system_status</div>
+      <div class="counter-wrap"><span class="counter" data-count="7">0</span><small>years building product</small></div>
+      <div class="hud-row"><span>domains</span><b>Fintech · Legal-tech · Travel · FMCG</b></div>
+      <div class="hud-row"><span>origin_class</span><b>QA Engineer → PM</b></div>
+      <div class="hud-row"><span>ai_delivery</span><b>Shipped to production</b></div>
+      <div class="hud-row"><span>languages</span><b>EN native · DE B2</b></div>
+      <div class="hud-row"><span>location</span><b>Berlin · EU</b></div>
+    </aside>
+  </section>
+
+  <!-- ================= PROFILE ================= -->
+  <section id="profile">
+    <div class="label">01 <span>/ Profile</span></div>
+    <div class="panel profile reveal">
+      Product manager who <strong>thinks like an engineer</strong>. Around seven years across fintech, legal-tech,
+      travel tech and FMCG, starting in QA engineering and moving into product ownership. I shipped an
+      <strong>AI document processing platform</strong> to production at Rightmart, and I still build hands-on
+      with the Claude API, n8n, Cursor, React Native and Supabase — so I can scope AI features
+      realistically, write specs engineers trust, and evaluate model output with real metrics.
+    </div>
+    <div class="pillars">
+      <div class="panel pillar reveal">
+        <div class="ico">[01] ai_delivery</div>
+        <h3>AI from prototype to production</h3>
+        <p>LLM workflows, prompt design, evaluation (precision/recall) and the guardrails that make AI features shippable.</p>
+      </div>
+      <div class="panel pillar reveal">
+        <div class="ico">[02] quality_first</div>
+        <h3>QA-grade rigour</h3>
+        <p>Test automation background — Cypress, GraphQL, CI/CD — means sharper acceptance criteria and fewer surprises at release.</p>
+      </div>
+      <div class="panel pillar reveal">
+        <div class="ico">[03] regulated_domains</div>
+        <h3>Comfortable with complexity</h3>
+        <p>Fintech and legal-tech experience: payments, compliance-sensitive flows, and document-heavy operations.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EXPERIENCE ================= -->
+  <section id="experience">
+    <div class="label">02 <span>/ Experience</span></div>
+    <!-- EDIT: confirm titles, dates and order; replace bullets with your own metrics -->
+    <div class="timeline">
+
+      <article class="panel job open reveal">
+        <div class="job-head">
+          <div>
+            <h3>Technical Product Owner · <span class="co">Rightmart</span></h3>
+            <div class="sector">Legal-tech</div>
+          </div>
+          <div class="meta">20XX — 20XX · Berlin</div>
+        </div>
+        <div class="job-body"><div>
+          <ul>
+            <li>Owned delivery of an AI document processing platform that classifies and extracts data from incoming legal documents, taking it from discovery to production.</li>
+            <li>Translated legal operations workflows into LLM pipeline requirements, prompt specs and evaluation criteria with engineering.</li>
+            <li>Defined quality gates and acceptance tests for model output, drawing on a QA engineering background.</li>
+            <li>EDIT: add a headline metric (e.g. documents processed per month, hours saved, accuracy reached).</li>
+          </ul>
+          <div class="tags"><span class="tag">LLMs</span><span class="tag">Document AI</span><span class="tag">Workflow automation</span><span class="tag">Discovery</span></div>
+        </div></div>
+        <div class="toggle-hint">+ click to expand</div>
+      </article>
+
+      <article class="panel job reveal">
+        <div class="job-head">
+          <div>
+            <h3>Product / QA · <span class="co">Bitwala / Nuri</span></h3>
+            <div class="sector">Fintech · Banking &amp; crypto</div>
+          </div>
+          <div class="meta">20XX — 20XX · Berlin</div>
+        </div>
+        <div class="job-body"><div>
+          <ul>
+            <li>Worked on a regulated mobile banking and crypto product, where release quality and compliance mattered as much as speed.</li>
+            <li>Built and maintained automated test coverage across web, API (GraphQL) and CI/CD pipelines.</li>
+            <li>EDIT: add scope, ownership and a measurable outcome.</li>
+          </ul>
+          <div class="tags"><span class="tag">Fintech</span><span class="tag">Cypress</span><span class="tag">GraphQL</span><span class="tag">CI/CD</span></div>
+        </div></div>
+        <div class="toggle-hint">+ click to expand</div>
+      </article>
+
+      <article class="panel job reveal">
+        <div class="job-head">
+          <div>
+            <h3>Role title · <span class="co">Kayak</span></h3>
+            <div class="sector">Travel tech</div>
+          </div>
+          <div class="meta">20XX — 20XX · Berlin</div>
+        </div>
+        <div class="job-body"><div>
+          <ul>
+            <li>Contributed to a high-traffic consumer travel search product used across many markets.</li>
+            <li>EDIT: describe your scope (features, teams, quality ownership) and an outcome.</li>
+          </ul>
+          <div class="tags"><span class="tag">Consumer product</span><span class="tag">Scale</span><span class="tag">Quality</span></div>
+        </div></div>
+        <div class="toggle-hint">+ click to expand</div>
+      </article>
+
+      <article class="panel job reveal">
+        <div class="job-head">
+          <div>
+            <h3>Role title · <span class="co">Heineken International</span></h3>
+            <div class="sector">FMCG</div>
+          </div>
+          <div class="meta">20XX — 20XX</div>
+        </div>
+        <div class="job-body"><div>
+          <ul>
+            <li>Built commercial and analytical grounding in a global consumer-goods organisation.</li>
+            <li>EDIT: describe your scope and an outcome.</li>
+          </ul>
+          <div class="tags"><span class="tag">Business analysis</span><span class="tag">Stakeholders</span></div>
+        </div></div>
+        <div class="toggle-hint">+ click to expand</div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= AI BUILDS ================= -->
+  <section id="builds">
+    <div class="label">03 <span>/ Independent AI builds</span></div>
+    <div class="projects">
+      <div class="panel project reveal">
+        <span class="state building">In development</span>
+        <h3>Hyperlocal meal-prep planner</h3>
+        <p>Mobile app that plans meal prep around local options, grown out of a craving-interception app. Architecture, prompt templates and wireframes complete; launch targeted for December.</p>
+        <div class="tags"><span class="tag">React Native</span><span class="tag">Supabase</span><span class="tag">Claude API</span><span class="tag">n8n</span><span class="tag">Google Places</span></div>
+      </div>
+      <div class="panel project reveal">
+        <span class="state proto">Prototype</span>
+        <h3>Payout rail router</h3>
+        <p>Helps a payroll operator pick the lowest-cost payment rail that still meets an employee's deadline — SEPA Instant, SEPA, ACH, Faster Payments or SWIFT — with an LLM explaining each choice and showing alternatives.</p>
+        <div class="tags"><span class="tag">Payments</span><span class="tag">Decision logic</span><span class="tag">Explainable AI</span></div>
+      </div>
+      <div class="panel project reveal">
+        <span class="state proto">Prototype</span>
+        <h3>Product data quality checker</h3>
+        <p>An LLM that reviews product listings for content and localization issues, paired with an evaluation harness that measures its precision and recall.</p>
+        <div class="tags"><span class="tag">LLM evals</span><span class="tag">Precision / recall</span><span class="tag">Merchandising</span></div>
+      </div>
+      <div class="panel project reveal">
+        <span class="state shipped">Running</span>
+        <h3>Lead classification pipeline</h3>
+        <p>Self-hosted n8n on a Hetzner VPS with Docker and PostgreSQL, classifying inbound leads automatically.</p>
+        <div class="tags"><span class="tag">n8n</span><span class="tag">Docker</span><span class="tag">PostgreSQL</span><span class="tag">Self-hosting</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SKILLS ================= -->
+  <section id="skills">
+    <div class="label">04 <span>/ Stack</span></div>
+    <div class="skills">
+      <div class="panel skill-group reveal">
+        <h3>// Product</h3>
+        <div class="chips">
+          <span class="chip">Product discovery</span><span class="chip">Roadmapping</span><span class="chip">Backlog ownership</span>
+          <span class="chip">User stories &amp; AC</span><span class="chip">Stakeholder management</span><span class="chip">Experimentation</span>
+          <span class="chip">B2B &amp; B2C</span><span class="chip">Release management</span>
+        </div>
+      </div>
+      <div class="panel skill-group reveal">
+        <h3>// AI &amp; automation</h3>
+        <div class="chips">
+          <span class="chip">Claude API</span><span class="chip">Prompt engineering</span><span class="chip">LLM evaluation</span>
+          <span class="chip">n8n</span><span class="chip">Cursor</span><span class="chip">Document AI</span>
+        </div>
+      </div>
+      <div class="panel skill-group reveal">
+        <h3>// Engineering &amp; QA</h3>
+        <div class="chips">
+          <span class="chip">Cypress</span><span class="chip">GraphQL</span><span class="chip">Docker</span>
+          <span class="chip">PostgreSQL</span><span class="chip">CI/CD</span><span class="chip">React Native</span><span class="chip">Supabase</span>
+        </div>
+      </div>
+      <div class="panel skill-group reveal">
+        <h3>// Data</h3>
+        <div class="chips">
+          <span class="chip">Python</span><span class="chip">Machine learning basics</span><span class="chip">Tableau</span>
+          <span class="chip">SQL</span><span class="chip">Product analytics</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EDUCATION ================= -->
+  <section id="education">
+    <div class="label">05 <span>/ Education &amp; languages</span></div>
+    <div class="edu">
+      <div class="panel edu-card reveal">
+        <div class="kind">Master's</div>
+        <h3>MA International Management</h3>
+        <p>SRH Berlin University of Applied Sciences</p>
+      </div>
+      <div class="panel edu-card reveal">
+        <div class="kind">Bachelor's</div>
+        <h3>BA Economics</h3>
+        <p>EDIT: university name</p>
+      </div>
+      <div class="panel edu-card reveal">
+        <div class="kind">Certification</div>
+        <h3>Data Analytics</h3>
+        <p>Ironhack Berlin — Python, machine learning, Tableau</p>
+      </div>
+    </div>
+    <div class="lang">
+      <div class="panel lang-item reveal">
+        <div class="row"><strong>English</strong><span>Native</span></div>
+        <div class="bar"><i style="--w:100%"></i></div>
+      </div>
+      <div class="panel lang-item reveal">
+        <div class="row"><strong>German</strong><span>B2</span></div>
+        <div class="bar"><i style="--w:66%"></i></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>// end_of_file — built by Shola with HTML, CSS &amp; JS</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Theme toggle ---------- */
+  const root = document.documentElement;
+  try { const t = localStorage.getItem('cv-theme'); if (t) root.dataset.theme = t; } catch (e) {}
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const next = root.dataset.theme === 'light' ? 'dark' : 'light';
+    root.dataset.theme = next;
+    try { localStorage.setItem('cv-theme', next); } catch (e) {}
+  });
+
+  /* ---------- Print / PDF ---------- */
+  document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+  /* ---------- Typed tagline ---------- */
+  const lines = [
+    '> the PM who thinks like an engineer',
+    '> shipped AI document processing to production',
+    '> QA engineer turned product owner',
+    '> builds with Claude API · n8n · React Native'
+  ];
+  const el = document.getElementById('typed');
+  if (reduce) { el.textContent = lines[0]; }
+  else {
+    let li = 0, ci = 0, del = false;
+    (function tick() {
+      const s = lines[li];
+      el.textContent = s.slice(0, ci);
+      if (!del && ci < s.length) ci++;
+      else if (!del) { del = true; return setTimeout(tick, 1800); }
+      else if (ci > 0) ci--;
+      else { del = false; li = (li + 1) % lines.length; }
+      setTimeout(tick, del ? 28 : 55);
+    })();
+  }
+
+  /* ---------- Scroll reveal + counters + bars ---------- */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in');
+      e.target.querySelectorAll('.bar i').forEach(b => b.style.width = getComputedStyle(b).getPropertyValue('--w'));
+      e.target.querySelectorAll('[data-count]').forEach(c => {
+        const end = +c.dataset.count; let n = 0;
+        const step = () => { n++; c.textContent = n + (n === end ? '+' : ''); if (n < end) setTimeout(step, 90); };
+        reduce ? (c.textContent = end + '+') : step();
+      });
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(r => io.observe(r));
+
+  /* ---------- Expandable jobs ---------- */
+  document.querySelectorAll('.job').forEach(j => j.addEventListener('click', () => j.classList.toggle('open')));
+
+  /* ---------- Spotlight on project cards ---------- */
+  document.querySelectorAll('.project').forEach(p => p.addEventListener('mousemove', ev => {
+    const r = p.getBoundingClientRect();
+    p.style.setProperty('--mx', (ev.clientX - r.left) + 'px');
+    p.style.setProperty('--my', (ev.clientY - r.top) + 'px');
+  }));
+
+  /* ---------- Active nav link ---------- */
+  const links = [...document.querySelectorAll('.nav a')];
+  const navIO = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  }), { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('section[id]').forEach(s => navIO.observe(s));
+
+  /* ---------- Particle network background ---------- */
+  const cv = document.getElementById('field');
+  const ctx = cv.getContext('2d');
+  let W, H, pts = [], mouse = { x: -999, y: -999 };
+  const resize = () => {
+    W = cv.width = innerWidth; H = cv.height = innerHeight;
+    const n = Math.min(90, Math.floor(W * H / 16000));
+    pts = Array.from({ length: n }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35
+    }));
+  };
+  addEventListener('resize', resize);
+  addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  resize();
+  const color = () => getComputedStyle(root).getPropertyValue('--cyan').trim() || '#3ef2e0';
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const c = color();
+    for (const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+      const dm = Math.hypot(p.x - mouse.x, p.y - mouse.y);
+      if (dm < 140) { p.x += (p.x - mouse.x) / dm * .6; p.y += (p.y - mouse.y) / dm * .6; }
+    }
+    ctx.strokeStyle = c; ctx.fillStyle = c;
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i];
+      ctx.globalAlpha = .55;
+      ctx.beginPath(); ctx.arc(a.x, a.y, 1.4, 0, Math.PI * 2); ctx.fill();
+      for (let j = i + 1; j < pts.length; j++) {
+        const b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 130) {
+          ctx.globalAlpha = (1 - d / 130) * .22;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    if (!reduce) requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
